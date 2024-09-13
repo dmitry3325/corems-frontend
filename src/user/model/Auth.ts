@@ -19,3 +19,12 @@ export interface TokenResponse {
 export interface AccessTokenResponse {
   accessToken: string;
 }
+
+export interface Token {
+  sub: string; // User ID here
+  user_name: string;
+  email: string;
+  roles: string[];
+  exp: number;
+  iat: number;
+}

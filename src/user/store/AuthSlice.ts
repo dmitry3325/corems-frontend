@@ -1,31 +1,25 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 
 import { USER_API_BASE_URL } from "@/user/config";
 import { User } from "@/user/model/User";
-import { ErrorResponse } from "@/common/model/Error";
-import { SignInUserRequest, TokenResponse } from "@/user/model/Auth";
-import axios from "axios";
+import { Token, TokenResponse } from "@/user/model/Auth";
 import { jwtDecode } from "jwt-decode";
+import CoreMsApi, { HttpMethod } from "../../common/utils/coreMsApi";
 
 interface AuthState {
   isAuthenticated: boolean;
   isInProgress: boolean;
   accessToken?: string;
-  refereshToken?: string;
+  refreshToken?: string;
+  parsedRefreshToken?: Token;
   user?: User;
-  error?: ErrorResponse;
 }
 
-const userMsApi = axios.create({ baseURL: USER_API_BASE_URL });
+const userMsApi = new CoreMsApi({ baseURL: USER_API_BASE_URL });
 
-export const signInUser = createAsyncThunk(
-  "auth/signInUser",
-  async (userData: SignInUserRequest) => {
-    return await userMsApi.post<TokenResponse>(
-      USER_API_BASE_URL + "/api/auth/login",
-      userData
-    );
-  }
+export const signInUser = userMsApi.createAsyncThunk<TokenResponse>(
+  HttpMethod.POST,
+  "/api/auth/login"
 );
 
 const initialState: AuthState = {
@@ -56,15 +50,26 @@ const authSlice = createSlice({
         state.isInProgress = false;
         state.isAuthenticated = true;
 
-        const tokenResponse = action.payload.data;
-        localStorage.setItem("refreshToken", tokenResponse.refreshToken);
-        state.accessToken = tokenResponse.accessToken;
-        state.refereshToken = tokenResponse.refreshToken;
-        const user = jwtDecode<User>(tokenResponse.refreshToken);
-        state.user = user;
+        state.accessToken = action.payload.accessToken;
+        state.refreshToken = action.payload.refreshToken;
 
-        console.log(state.isAuthenticated);
-        console.log(user);
+        state.parsedRefreshToken = jwtDecode<Token>(
+          action.payload.refreshToken
+        );
+
+        state.user = {
+          id: state.parsedRefreshToken.sub,
+          email: state.parsedRefreshToken.email,
+          fullName: state.parsedRefreshToken.user_name,
+          roles: state.parsedRefreshToken.roles,
+        } as User;
+
+        console.log("User:", state.user);
+      })
+      .addCase(signInUser.rejected, (state, action) => {
+        state.isInProgress = false;
+        state.isAuthenticated = false;
+        throw action.payload;
       });
   },
 });

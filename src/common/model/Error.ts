@@ -4,6 +4,6 @@ export interface Error {
   details?: string;
 }
 
-export interface ErrorResponse {
+export interface ApiErrorResponse {
   errors: Error[];
 }

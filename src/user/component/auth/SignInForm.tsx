@@ -1,5 +1,5 @@
 import { Button, Col, FloatingLabel, Form, Row } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, redirect } from "react-router-dom";
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from 'react-hook-form';
@@ -7,6 +7,8 @@ import { useForm } from 'react-hook-form';
 import { signInUser } from "@/user/store/AuthSlice";
 import { SignInUserRequest } from "@/user/model/Auth";
 import { useAppDispatch } from "@/app/Hooks";
+import { ApiErrorResponse } from "@//common/model/Error";
+import { ROUTE_HOME } from "@/app/Router";
 
 
 const signInSchema = yup.object().shape({
@@ -14,11 +16,13 @@ const signInSchema = yup.object().shape({
   password: yup.string().required('Password is required'),
 });
 
+
 const SignInForm = () => {
   const dispatch = useAppDispatch();
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: yupResolver(signInSchema),
@@ -26,15 +30,21 @@ const SignInForm = () => {
 
 
   const onSubmit = async (data: SignInUserRequest) => {
-    console.log('Email:', data.email);
-    console.log('Password:', data.password);
     try {
-      const result = await dispatch(signInUser(data));
-      console.log("onSubmit Result", result);
-    } catch (error) {
-      console.error("onSubmit", error);
+      await dispatch(signInUser(data));
+      redirect(ROUTE_HOME);
+    } catch (requestError) {
+      const errorResponse = requestError as { data?: ApiErrorResponse };
+      if (errorResponse.data) {
+        const serverErrors = errorResponse.data as ApiErrorResponse;
+        Object.values(serverErrors.errors).forEach((error) => {
+          setError("root", {
+            type: 'server',
+            message: error.details,
+          });
+        });
+      }
     }
-
   };
 
   return (
@@ -74,6 +84,7 @@ const SignInForm = () => {
           {errors.email?.message}
         </Form.Control.Feedback>
       </FloatingLabel>
+      <span className="error text-danger px-2">{errors.root?.message}</span>
       <Row className="justify-content-cenmt mb-3">
         <Col xs={{ span: 6, offset: 6 }} className="text-end">
           <Link to={'forgot_password'} className="link-secondary text-decoration-none">Forgot password?</Link>
