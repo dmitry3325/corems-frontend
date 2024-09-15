@@ -21,7 +21,7 @@ const AppHeader = () => {
             <Nav.Link as={Link} to={ROUTE_PRICING}>Pricing</Nav.Link>
           </Nav>
           <Nav>
-            {auth.isAuthenticated ? <Nav.Link as={Link} to={ROUTE_USER}>{auth.fullName}</Nav.Link> : <Nav.Link as={Link} to={ROUTE_LOGIN}>Login</Nav.Link>}
+            {auth.isAuthenticated ? <Nav.Link as={Link} to={ROUTE_USER}>{auth.user?.fullName}</Nav.Link> : <Nav.Link as={Link} to={ROUTE_LOGIN}>Login</Nav.Link>}
           </Nav>
         </Navbar.Collapse>
       </Container>

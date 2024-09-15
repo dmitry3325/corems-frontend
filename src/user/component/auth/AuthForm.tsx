@@ -3,11 +3,17 @@ import { Row, Col, Container } from 'react-bootstrap';
 
 import SignInForm from './SignInForm';
 import SignUpForm from './SignUpForm';
-import { GOOGLE_AUTH_URL, GITHUB_AUTH_URL } from "@/user/config";
+import { GOOGLE_AUTH_URL, GITHUB_AUTH_URL, LINKEDIN_AUTH_URL } from "@/user/config";
 
 
 const AuthForm = () => {
   const [isSignIn, setIsSignIn] = useState(true);
+  const [isSignedUp, setIsSignedUp] = useState(false);
+
+  const handleSignUp = () => {
+    setIsSignedUp(true);
+    setIsSignIn(true);
+  };
 
   return (
     <Container>
@@ -27,7 +33,8 @@ const AuthForm = () => {
       </Row>
       <Row className="justify-content-center">
         <Col xs={12} lg={4}>
-          {isSignIn ? <SignInForm /> : <SignUpForm />}
+          {isSignedUp ? <p className="fw-bold text-center">Thank you for registration. Please login.</p> : null}
+          {isSignIn ? <SignInForm /> : <SignUpForm onSignedUp={handleSignUp} />}
         </Col>
         <Col xs={12} lg={2} className="d-flex align-items-center justify-content-center gap-3 flex-lg-column mb-4">
           <div className="bg-dark h-100 d-none d-lg-block" style={{ width: '1px', opacity: 0.1 }}></div>
@@ -45,6 +52,10 @@ const AuthForm = () => {
             <a href={GITHUB_AUTH_URL} className="btn btn-outline-dark rounded-0 d-flex align-items-center py-2 px-4">
               <i className="bi bi-github text-dark"></i>
               <span className="ms-2 fs-6 flex-grow-1">Continue with GitHub</span>
+            </a>
+            <a href={LINKEDIN_AUTH_URL} className="btn btn-outline-dark rounded-0 d-flex align-items-center py-2 px-4">
+              <i className="bi bi-linkedin text-dark"></i>
+              <span className="ms-2 fs-6 flex-grow-1">Continue with LinkedIn</span>
             </a>
           </div>
         </Col>

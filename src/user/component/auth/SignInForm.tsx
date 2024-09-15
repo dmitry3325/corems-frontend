@@ -1,13 +1,13 @@
-import { Button, Col, FloatingLabel, Form, Row } from "react-bootstrap";
-import { Link, redirect } from "react-router-dom";
 import * as yup from 'yup';
+import { Button, Col, FloatingLabel, Form, Row } from "react-bootstrap";
+import { Link, useNavigate } from "react-router-dom";
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from 'react-hook-form';
 
 import { signInUser } from "@/user/store/AuthSlice";
 import { SignInUserRequest } from "@/user/model/Auth";
 import { useAppDispatch } from "@/app/Hooks";
-import { ApiErrorResponse } from "@//common/model/Error";
+import { ApiErrorResponse } from "@/common/model/Response";
 import { ROUTE_HOME } from "@/app/Router";
 
 
@@ -18,6 +18,7 @@ const signInSchema = yup.object().shape({
 
 
 const SignInForm = () => {
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const {
     register,
@@ -32,7 +33,7 @@ const SignInForm = () => {
   const onSubmit = async (data: SignInUserRequest) => {
     try {
       await dispatch(signInUser(data));
-      redirect(ROUTE_HOME);
+      navigate(ROUTE_HOME);
     } catch (requestError) {
       const errorResponse = requestError as { data?: ApiErrorResponse };
       if (errorResponse.data) {

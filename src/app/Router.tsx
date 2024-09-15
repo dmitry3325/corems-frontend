@@ -55,7 +55,6 @@ export const router = createBrowserRouter([
         element: <div>Features </div>,
         loader: redirectIfNotAuthenticated,
       },
-    ]
+    ],
   },
 ]);
-
